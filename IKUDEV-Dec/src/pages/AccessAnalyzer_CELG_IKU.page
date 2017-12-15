@@ -1,0 +1,124 @@
+<!---------------------------------------------------------------------------------------------------------------
+* Page Name    : AccessAnalyzer_CELG_IKU.
+* Description  : The extensions for this page is "AccessToAnalyzerController_CELG_IKU".
+To provide a rich User Interface this page was developed. 
+User can create an access request to Analyzer Tools/ Applications/ Enterprise Data Sets
+* Created By   : Deloitte
+* Created On   : 13th Oct, 2016                                                                                
+----------------------------------------------------------------------------------------------------------------->
+<apex:page sidebar="false"  showHeader="false" title="{!$Label.AccessToAnalyzerLabel_CELG_IKU}" docType="html-5.0" Controller="AccessAnalyzerController_CELG_IKU" action="{!userActivityRecords}" >
+    <apex:includeScript value="{!URLFOR($Resource.Workspace_CELG_IKU, 'javascript/jquery-1.11.3.min.js')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.HeaderFooter_CELG_IKU,'css/homepageStyles.css')}"/>
+    <apex:stylesheet value="{!URLFOR($Resource.HeaderFooter_CELG_IKU,'css/font-awesome.min.css')}"/>   
+    <apex:stylesheet value="{!URLFOR($Resource.objectDetail,'css/objectDetail.css')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.objectDetail, 'js/objectDetail.js')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.SearchEnterprise_CELG_IKU,'css/searchBar.css')}"/>    
+    <c:CelgeneHeader_CELG_IKU ></c:CelgeneHeader_CELG_IKU>
+    <style type="text/css">
+        <!-- The below styles has to be here in the page as we have to highlight the tab when in this page -->
+        #pageContent .inAnalysesPage{
+            background-color: #FFFFFF;
+            color: #000066;
+            padding: 25px 43px 0;
+            border-right: none;
+            border-top: 5px solid rgb(19,178,219);
+            height: 80px;
+            box-sizing: border-box;
+        }
+    </style>
+    <apex:outputPanel >
+        <main id="accessToAnalyzer"  class="analyzerPage">
+            <apex:form >
+                <apex:actionFunction name="callSubmit" action="{!createRequest }"  reRender="displayErrorMessage" status="overlaystatus" />
+                <div id="hiddenInput">
+                    <apex:inputHidden value="{!selectedEnterpriseApplications}" id="enterpriseSets" />
+                    <apex:inputHidden value="{!selectedAnalyzerTools }" id="tools" />
+                </div>
+                <div class="pageContent">
+                    <div class="formDetail">
+                        <div class="formHeading">{!$Label.RequestAccessForm_CELG_IKU}</div>
+                        <div class="formText">
+                            <div>
+                                {!$Label.RequestAccessFormTitle_CELG_IKU}
+                            </div>
+                            <ul class="listStyle">
+                                <li>{!$Label.RequestAccessFormSubTitle1_CELG_IKU}</li>
+                                <li>{!$Label.RequestAccessFormSubTitle3_CELG_IKU}</li>
+                                <li>{!$Label.RequestAccessFormSubTitle4_CELG_IKU}<a href="{!$Label.SynapseAccessRequestForm_CELG_IKU}" target="_blank"> here </a>{!$Label.RequestAccessFormSubTitle5_CELG_IKU}</li>
+                           </ul>
+                        </div>
+                    </div>
+                    <div class="formDetailsContainer">
+                        <apex:outputPanel id="displayErrorMessage">
+                            <apex:outputPanel rendered="{!warningMessages !=null && warningMessages.size>0}">
+                                <div class="isa_error" style="margin:0;">                                    
+                                    <div>
+                                        <i class="fa fa-times-circle"></i>
+                                        <apex:repeat value="{!warningMessages}" var="warningmsg">
+                                            {!warningmsg}
+                                        </apex:repeat>
+                                    </div>
+                                </div>  
+                            </apex:outputPanel>
+                        </apex:outputPanel>
+                        <div class="AnalyzerItem">
+                            <div class="titleHolder">
+                                <div class="requestContainer"><span>{!$Label.AsteriskForMandatory_CELG_IKU}</span><span class="requestText">{!$Label.RequestRationale_CELG_IKU}</span></div>
+                                <div class="usersContainer"><span>{!$Label.AsteriskForMandatory_CELG_IKU}</span><span class="requestText">Select Users</span></div>
+                            </div>
+                            <div class="inputContainer">
+                                <apex:inputField style="height:124px;" styleClass="inputTextNew" value="{!obj.WhatIsTheBusinessRationale_CELG_IKU__c}" />
+                            </div>
+                            <c:SelectUsersComponent_CELG_IKU pageController1="{!this}" />
+                        </div>                        
+                        <div class="separator"></div>
+                        <div class="AnalyzerItem">
+                            <div class="clear">
+                                <div class="requestTitle">{!$Label.RequestAccesstoEnterpriseApplications_CELG_IKU}</div>
+                                <apex:repeat value="{!AnalyzerApplicationRec}" var="ATWrapper">
+                                    <div class="alignTools enterpriseApplications">                                        
+                                        <input type="checkbox" name='applications' id='{!ATWrapper.Name}' class="{!IF(ATWrapper.Status_CELG_IKU__c == NULL || ATWrapper.Status_CELG_IKU__c != $Label.RetiredStatus_CELG_IKU,'','checkboxDisabled')}" value='{!ATWrapper.Name}'/><label for='{!ATWrapper.Name}'>{!ATWrapper.Name}</label>
+                                    </div>
+                                </apex:repeat>
+                            </div>
+                        </div>
+                        <div class="separator"></div>
+                        <div class="AnalyzerItem">
+                            <div class="clear">
+                                <div class="requestTitle requestTitle1">{!$Label.RequestAccesstoAnalyzerDeveloperTools_CELG_IKU}</div>  
+                                <div class="requestTitle1">
+                                {!$Label.RequestAccesstoAnalyzerDeveloperToolsSubTitle_CELG_IKU} <a class="link" href="{!$Label.IKUMailTo_CELG_IKU}">{!$Label.IKUTeamEmail_CELG_IKU}</a> {!$Label.RequestAccesstoAnalyzerDeveloperToolsSubTitle1_CELG_IKU}
+                                    <apex:outputPanel rendered="{!isDataSteward}">
+                                        <br/>
+                                        {!$Label.SASNTableauTextDS_CELG_IKU}
+                                    </apex:outputPanel>
+                                </div>                                                              
+                            </div>
+                            <ul class="toolsListNew">
+                                <apex:repeat value="{!AnalyzerToolRec}" var="ATWrapper">
+                                    <li class="toolsListliNew analyzerTools">
+                                        <apex:outputPanel rendered="{!IF(isDataSteward && (ATWrapper.Name == $Label.SASToolName_CELG_IKU || ATWrapper.Name == $Label.TableauDesktop_CELG_IKU),true,false)}">
+                                            <div class="alignTools"><input type="checkbox" name='tools' id='{!ATWrapper.Name}' value='{!ATWrapper.Name}' class="toolsInput {!IF(ATWrapper.Status_CELG_IKU__c == NULL || ATWrapper.Status_CELG_IKU__c != $Label.RetiredStatus_CELG_IKU,'','checkboxDisabled')}" /><label  class="toolsLabel" for='{!ATWrapper.Name}'>{!ATWrapper.Name}</label></div>
+                                        </apex:outputPanel>
+                                        <apex:outputPanel rendered="{!IF(ATWrapper.Name != $Label.SASToolName_CELG_IKU && ATWrapper.Name != $Label.TableauDesktop_CELG_IKU,true,false)}">
+                                            <div class="alignTools"><input type="checkbox" name='tools' id='{!ATWrapper.Name}' value='{!ATWrapper.Name}' class="toolsInput {!IF(ATWrapper.Status_CELG_IKU__c == NULL || ATWrapper.Status_CELG_IKU__c != $Label.RetiredStatus_CELG_IKU,'','checkboxDisabled')}" /><label  class="toolsLabel" for='{!ATWrapper.Name}'>{!ATWrapper.Name}</label></div>
+                                        </apex:outputPanel>
+                                    </li>
+                                </apex:repeat>
+                            </ul>
+                        </div>
+                        <div class="separator"></div>
+                        <div class="saveCancel">
+                            <div class="submit" id="submitRequest">{!$Label.AnalyzerSubmit_CELG_IKU}</div>
+                            <div class="cancelHome" onclick="window.open('/apex/home_celg_iku','_parent');">{!$Label.AnalyzerCancel_CELG_IKU}</div>
+                        </div>
+                    </div>
+                </div>
+            </apex:form>              
+        </main>
+    </apex:outputPanel>
+    <c:CelgeneFooter_CELG_IKU ></c:CelgeneFooter_CELG_IKU>   
+    <script>
+        accessAnalyzer.init();
+    </script>    
+</apex:page>
